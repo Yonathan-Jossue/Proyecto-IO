@@ -327,45 +327,90 @@ def gran_m(request):
             # Construir tabla inicial con Gran M
             tabla, base, encabezados = construir_tabla_gran_m(lista_restricciones, z, num_variables)
 
-            # Iteraciones Simplex
+            # Iteraciones del método Simplex con Gran M
             iteracion = 0
             max_iter = 50
+            prev_z = None  # Para comparar si Z ya no cambia
+
             while True:
                 tablas_iteraciones.append((deepcopy(base), deepcopy(tabla), iteracion))
 
                 # Última fila = Z
                 z_row = tabla[-1][:-1]
-                if all(c >= 0 for c in z_row):
+
+                # 🔹 Ignorar columnas artificiales en el criterio de parada
+                z_filtrada = [
+                    c for idx, c in enumerate(z_row)
+                    if not encabezados[idx].startswith("a")
+                ]
+
+                # 🔹 Nuevo criterio: todos coeficientes no negativos (tolerancia)
+                if all(c >= -1e-6 for c in z_filtrada):
                     break
 
+                # 🔹 Detección de estancamiento: si la fila Z no cambia
+                if prev_z is not None and np.allclose(z_row, prev_z, atol=1e-6):
+                    resultado += "<p>Iteraciones detenidas: no hay mejora en Z.</p>"
+                    break
+                prev_z = z_row.copy()
+
+                # Columna entrante (coeficiente más negativo en Z)
                 col_entrante = np.argmin(z_row)
 
-                # Razón mínima
+                # Razón mínima (RHS / columna entrante)
                 ratios = []
-                for i in range(len(tabla)-1):
-                    ratios.append(tabla[i][-1]/tabla[i][col_entrante] if tabla[i][col_entrante]>0 else float('inf'))
+                for i in range(len(tabla) - 1):
+                    if tabla[i][col_entrante] > 0:
+                        ratios.append(tabla[i][-1] / tabla[i][col_entrante])
+                    else:
+                        ratios.append(float('inf'))
 
                 if all(r == float('inf') for r in ratios):
                     resultado += "<p>Problema no acotado</p>"
                     break
 
                 fila_saliente = ratios.index(min(ratios))
-
                 pivot = tabla[fila_saliente][col_entrante]
-                tabla[fila_saliente] = [x/pivot for x in tabla[fila_saliente]]
 
+                if abs(pivot) < 1e-9:
+                    resultado += "<p>Error: pivoteo inválido (división por cero)</p>"
+                    break
+
+                # Normalizar la fila pivote
+                tabla[fila_saliente] = [x / pivot for x in tabla[fila_saliente]]
+
+                # Actualizar el resto de filas
                 for i in range(len(tabla)):
                     if i != fila_saliente:
                         factor = tabla[i][col_entrante]
-                        tabla[i] = [tabla[i][j]-factor*tabla[fila_saliente][j] for j in range(len(tabla[0]))]
+                        tabla[i] = [
+                            tabla[i][j] - factor * tabla[fila_saliente][j]
+                            for j in range(len(tabla[0]))
+                        ]
 
+                # Actualizar la base
                 base[fila_saliente] = encabezados[col_entrante]
+
+                # 🔹 Recalcular la fila Z correctamente
+                fila_z = [0] * len(tabla[0])
+                for j in range(len(fila_z)):
+                    for i in range(len(tabla) - 1):
+                        var_base = base[i]
+                        coef_z = 0
+                        if var_base.startswith("a"):  # variable artificial
+                            coef_z = -M
+                        elif var_base.startswith("x"):  # variable real
+                            idx = int(var_base[1:]) - 1
+                            coef_z = -z[idx]
+                        fila_z[j] += coef_z * tabla[i][j]
+                tabla[-1] = fila_z
+
                 iteracion += 1
                 if iteracion >= max_iter:
                     resultado += "<p>Límite de iteraciones alcanzado</p>"
                     break
 
-            # Generar HTML
+            # Generar el resultado HTML
             resultado = generar_tablas_html(tablas_iteraciones, encabezados, num_variables)
 
         except Exception as e:
@@ -381,8 +426,6 @@ def gran_m(request):
         'restricciones': restricciones,
         'resultado': resultado
     })
-
-
 # =========================
 # Funciones auxiliares
 # =========================
@@ -480,7 +523,7 @@ def generar_tablas_html(tablas_iteraciones, encabezados, num_variables):
             sol[var] = final_tabla[i][-1]
 
     # Z final
-    z_final = final_tabla[-1][-1]
+    z_final = abs(final_tabla[-1][-1])
     
     resultado += '<h3>Solución óptima</h3>'
     resultado += '<ul>'
@@ -490,7 +533,6 @@ def generar_tablas_html(tablas_iteraciones, encabezados, num_variables):
     resultado += '</ul>'
 
     return resultado
-
 
 def dos_fases(request):
     resultado = ''
@@ -691,7 +733,7 @@ def dos_fases(request):
             resultado = f"<p class='error'>❌ Error: {e}</p>"
             formulario_generado = True
 
-    return render(request, 'dos_fases.html',{
+    return render(request, 'dos_fases.html', {
         'resultado': resultado,
         'formulario_generado': formulario_generado,
         'num_variables': num_variables,
