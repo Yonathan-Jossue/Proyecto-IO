@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de Dos Fases</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'simplex.css' %}">
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">×</button>
+    <ul>
+        <li><h3 style="color: white; text-align: center;">Modulo II</h3></li>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'dos_fases' %}">Método de Dos Fases</a></li>
+    </ul>
+</nav>
+
+<button class="hamburger" onclick="toggleSidebar()" style="color: white;">☰ Menú</button>
+
+<header class="banner">
+    <h1>Método de Dos Fases</h1>
+</header>
+
+<main class="contenido">
+    <div class="form-container">
+        <form class="form-control" method="get" action="{% url 'dos_fases' %}">
+            <h2>Generar formulario</h2>
+            <label>Cantidad de variables:</label>
+            <input type="number" name="num_variables" min="1" value="{{ num_variables }}" required>
+            <label>Cantidad de restricciones:</label>
+            <input type="number" name="num_restricciones" min="1" value="{{ num_restricciones }}" required>
+            <button type="submit">Generar</button>
+        </form>
+
+        {% if formulario_generado %}
+        <form class="form-control" method="post" action="{% url 'dos_fases' %}">
+            {% csrf_token %}
+            <input type="hidden" name="num_variables" value="{{ num_variables }}">
+            <input type="hidden" name="num_restricciones" value="{{ num_restricciones }}">
+
+            <h2>Función objetivo (Z)</h2>
+            {% for i in variables %}
+                <input type="number" step="any" name="x{{ i }}" placeholder="Coeficiente x{{ i|add:'1' }}" required>
+            {% endfor %}
+
+            <h2>Tipo de problema</h2>
+            <select name="tipo" required>
+                <option value="max">Maximización</option>
+                <option value="min">Minimización</option>
+            </select>
+            <h2>Restricciones</h2>
+            {% for r in restricciones %}
+                <div class="restriccion">
+                    <span>Restricción {{ r|add:'1' }}:</span>
+                    {% for i in variables %}
+                        <input type="number" step="any" name="r{{ r }}x{{ i }}" placeholder="Coef x{{ i|add:'1' }}" required>
+                    {% endfor %}
+                    <select name="r{{ r }}sign">
+                        <option value="<=">&le;</option>
+                        <option value=">=">&ge;</option>
+                        <option value="=">=</option>
+                    </select>
+                    <input type="number" step="any" name="r{{ r }}b" placeholder="Valor RHS" required>
+                </div>
+            {% endfor %}
+
+            <button type="submit">Calcular Dos Fases</button>
+        </form>
+        {% endif %}
+
+        {% if resultado %}
+        <div id="resultado">
+            <h2>Resultados</h2>
+            {{ resultado|safe }}
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script src="{% static 'modulo1.js' %}"></script>
+<script>
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Inventarios - IO</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'simplex.css' %}">
+</head>
+<body>
+
+<!-- Menú lateral -->
+<nav class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">×</button>
+    <ul>
+        <li><h3 style="color: white; text-align: center;">Modulo III</h3></li>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'modulo_dual' %}">Método dual</a></li>
+        <li><a href="{% url 'modulo_inventario' %}">Modelo de Inventarios</a></li>
+    </ul>
+</nav>
+
+<button class="hamburger" onclick="toggleSidebar()" style="color: white;">☰ Menú</button>
+
+<header class="banner">
+    <h1>Modelo de Inventarios (EOQ y Punto de Reorden)</h1>
+</header>
+
+<main class="contenido">
+    <div class="form-container">
+        <form class="form-control" method="post" action="{% url 'modulo_inventario' %}">
+            {% csrf_token %}
+            <h2>Ingrese los Datos</h2>
+
+            <label>Demanda anual (D):</label>
+            <input type="number" step="any" name="demanda_anual" required>
+
+            <label>Costo por pedido (Cp):</label>
+            <input type="number" step="any" name="costo_pedido" required>
+
+            <label>Costo de mantener unidad (Ch):</label>
+            <input type="number" step="any" name="costo_mantener" required>
+
+            <label>Demanda diaria o semanal (d):</label>
+            <input type="number" step="any" name="demanda_diaria" required>
+
+            <label>Lead time (L):</label>
+            <input type="number" step="any" name="lead_time" required>
+
+            <label>Inventario de seguridad (SS):</label>
+            <input type="number" step="any" name="seguridad" required>
+
+            <button type="submit">Calcular</button>
+        </form>
+
+        {% if resultado %}
+        <div id="resultado" style="margin-top: 30px;">
+            <h2 style="color:#2c3e50;">Resultados y Procedimiento</h2>
+            {{ resultado|safe }}
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

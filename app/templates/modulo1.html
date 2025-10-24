@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1 - Investigación de Operaciones</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/modulo1.css' %}">
+</head>
+<body>
+
+<!-- Menú lateral tipo hamburguesa -->
+<nav class="sidebar" id="sidebar">
+    <button class="close-btn" onclick="toggleSidebar()">×</button>
+   <ul>
+        <li><h3 style="color: white; text-align: center;">Modulo I</h3></li>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'simplex' %}">Método Simplex</a></li>
+        <li><a href="{% url 'grafico' %}">Método Gráfico</a></li>
+    </ul>
+</nav>
+
+<!-- Botón hamburguesa -->
+<button class="hamburger" onclick="toggleSidebar()" style="color: white; ">☰ Menú</button>
+
+<!-- Banner -->
+<header class="banner">
+    <h1>Módulo 1</h1>
+</header>
+
+<!-- Descripción del módulo -->
+<div class="descripcion">
+    <p>En este módulo aprendimos los conceptos fundamentales del Método Gráfico y del Método Simplex, utilizados para resolver problemas de optimización lineal con dos o más variables.</p>
+</div>
+
+<div class="descripcion">
+    <p> ↖︎ Puedes realizar ejercicios con las herramientas del menú en la esquina superior izquierda </p>
+</div>
+
+
+<script src="{% static '/modulo1.js' %}"></script>
+</body>
+</html>

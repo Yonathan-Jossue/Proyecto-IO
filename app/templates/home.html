@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investigación de Operaciones - Home</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/home.css' %}">
+</head>
+<body>
+    <!-- Banner minimalista -->
+    <header class="banner">
+        <h1>Investigación de Operaciones</h1>
+    </header>
+
+    <!-- Contenedor de botones -->
+    <main class="container">
+        <a href="{% url 'modulo1' %}" class="btn">Módulo 1</a>
+        <a href="{% url 'modulo2' %}" class="btn">Módulo 2</a>
+        <a href="{% url 'modulo3' %}" class="btn">Módulo 3</a>
+    </main>
+</body>
+</html>
