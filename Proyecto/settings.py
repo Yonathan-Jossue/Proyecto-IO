@@ -1,25 +1,21 @@
 import os
-
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-7v+t418e6jm11*ve47%6&qf*5hbu687-h&r^6md!y407)b7i^-'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False  # 🚨 importante: Render es producción, no dejar True
 
-ALLOWED_HOSTS = ['proyecto-io-uqy9.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'proyecto-io-uqy9.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
-
-# Application definition
-
+# ------------------------------
+# APPS
+# ------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,8 +26,15 @@ INSTALLED_APPS = [
     'app',
 ]
 
+# ------------------------------
+# MIDDLEWARE
+# ------------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
+    # 👇 Agregamos WhiteNoise para servir archivos estáticos en Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -40,8 +43,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+# ------------------------------
+# TEMPLATES Y WSGI
+# ------------------------------
 ROOT_URLCONF = 'Proyecto.urls'
 
 TEMPLATES = [
@@ -61,10 +65,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Proyecto.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# ------------------------------
+# DATABASE
+# ------------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -72,50 +75,35 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# ------------------------------
+# AUTH
+# ------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# ------------------------------
+# LOCALIZATION
+# ------------------------------
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Guatemala'
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# ------------------------------
+# STATIC FILES (para Render)
+# ------------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Carpeta donde Django pondrá los archivos listos para producción
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'app', 'static'),
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app', 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# 👇 Esta línea es obligatoria para que WhiteNoise comprima y sirva el CSS correctamente
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ------------------------------
+# DEFAULT PRIMARY KEY FIELD TYPE
+# ------------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
